@@ -1,11 +1,13 @@
 using LogiTrack.Data;
 using LogiTrack.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace LogiTrack.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/orders")]
 public class OrderController : ControllerBase
 {
