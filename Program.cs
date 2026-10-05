@@ -1,24 +1,12 @@
-using System.Linq;
 using LogiTrack.Data;
 
-using (var context = new LogiTrackContext())
-{
-    if (!context.InventoryItems.Any())
-    {
-        context.InventoryItems.Add(new LogiTrack.Models.InventoryItem
-        {
-            Name = "Pallet Jack",
-            Quantity = 12,
-            Location = "Warehouse A"
-        });
+var builder = WebApplication.CreateBuilder(args);
 
-        context.SaveChanges();
-    }
+builder.Services.AddDbContext<LogiTrackContext>();
+builder.Services.AddControllers();
 
-    var items = context.InventoryItems.ToList();
+var app = builder.Build();
 
-    foreach (var item in items)
-    {
-        item.DisplayInfo();
-    }
-}
+app.MapControllers();
+
+app.Run();
