@@ -9,6 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<LogiTrackContext>();
 builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
 	options.User.RequireUniqueEmail = true;

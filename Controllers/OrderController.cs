@@ -22,27 +22,54 @@ public class OrderController : ControllerBase
 	public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
 	{
 		var orders = await _context.Orders
-			.Include(order => order.Items)
 			.AsNoTracking()
+			.Select(order => new
+			{
+				order.OrderId,
+				order.CustomerName,
+				order.DatePlaced,
+				Items = order.Items.Select(item => new
+				{
+					item.ItemId,
+					item.Name,
+					item.Quantity,
+					item.Location,
+					item.OrderId
+				}).ToList()
+			})
 			.ToListAsync(cancellationToken);
 
-		return Ok(orders.Select(ToResponse));
+		return Ok(orders);
 	}
 
 	[HttpGet("{id:int}")]
 	public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
 	{
 		var order = await _context.Orders
-			.Include(order => order.Items)
 			.AsNoTracking()
-			.FirstOrDefaultAsync(order => order.OrderId == id, cancellationToken);
+			.Where(order => order.OrderId == id)
+			.Select(order => new
+			{
+				order.OrderId,
+				order.CustomerName,
+				order.DatePlaced,
+				Items = order.Items.Select(item => new
+				{
+					item.ItemId,
+					item.Name,
+					item.Quantity,
+					item.Location,
+					item.OrderId
+				}).ToList()
+			})
+			.FirstOrDefaultAsync(cancellationToken);
 
 		if (order is null)
 		{
 			return NotFound();
 		}
 
-		return Ok(ToResponse(order));
+		return Ok(order);
 	}
 
 	[HttpPost]
@@ -65,6 +92,24 @@ public class OrderController : ControllerBase
 		return CreatedAtAction(nameof(GetById), new { id = order.OrderId }, ToResponse(order));
 	}
 
+	private static object ToResponse(Order order)
+	{
+		return new
+		{
+			order.OrderId,
+			order.CustomerName,
+			order.DatePlaced,
+			Items = order.Items.Select(item => new
+			{
+				item.ItemId,
+				item.Name,
+				item.Quantity,
+				item.Location,
+				item.OrderId
+			})
+		};
+	}
+
 	[HttpDelete("{id:int}")]
 	public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
 	{
@@ -83,21 +128,4 @@ public class OrderController : ControllerBase
 		return NoContent();
 	}
 
-	private static object ToResponse(Order order)
-	{
-		return new
-		{
-			order.OrderId,
-			order.CustomerName,
-			order.DatePlaced,
-			Items = order.Items.Select(item => new
-			{
-				item.ItemId,
-				item.Name,
-				item.Quantity,
-				item.Location,
-				item.OrderId
-			})
-		};
-	}
 }
